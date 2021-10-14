@@ -3,7 +3,7 @@
 # ============================ #
 
 from graph import Graph
-from problem import *
+from problems import *
 
 def main():
     # TODO: n et p en arguments

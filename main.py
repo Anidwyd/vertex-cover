@@ -3,7 +3,7 @@
 # ============================ #
 
 from graph import Graph
-from problem import *
+from problems import *
 
 def main():
     G = Graph.from_text('test/solo2.txt')
