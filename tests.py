@@ -1,13 +1,15 @@
 # ============================ #
-# ------- VERTEX COVER ------- #
+# -------- TEST ALGOS -------- #
 # ============================ #
 
 from graph import Graph
 from problem import *
 
 def main():
-    G = Graph.from_text('test/solo2.txt')
-    # G = Graph.random(4, .5)
+    # TODO: n et p en arguments
+    n = 4
+    p = .5
+    G = Graph.random(n, p, 'G')
     G.show()
     print("* algo couplage    :", couplage(G))
     print("* algo glouton     :", glouton(G))

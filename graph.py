@@ -1,18 +1,17 @@
 from random import uniform
 from parser import parse
-import copy
 
 class Graph:
 
-    def __init__(self, nb_som, sommets, nb_aretes, adjacences):
+    def __init__(self, nb_som, sommets, nb_aretes, adjacences, name='G'):
         self.nb_som = nb_som
         self.nb_aretes = nb_aretes
         self.sommets = sommets
         self.adjacences = adjacences
-
+        self.name = name if name else 'G'
 
     # =========================== #
-    # ========= OP BASE ========= #
+    # --------- OP BASE --------- #
     # =========================== #
 
     def suppr_aretes(self, v):
@@ -49,19 +48,22 @@ class Graph:
         return not self.sommets
 
     def show(self):
-        print("sommets:", self.sommets, "\naretes :", self.adjacences)
+        print("----------- ", self.name, " -----------",
+            "\nsommets  :", self.sommets,
+            "\naretes   :", self.adjacences,
+            "\n----------------------------\n")
 
 
     # =========================== #
-    # ======== BUILDERS ========= #
+    # -------- BUILDERS --------- #
     # =========================== #
 
     @staticmethod
-    def from_text(filename):
-        return Graph(*parse(filename))
+    def from_text(filename, name=None):
+        return Graph(*parse(filename), name)
 
     @staticmethod
-    def random(n, p):
+    def random(n, p, name=None):
         sommets = [i for i in range(n)]
         nb_aretes = 0
         adjacences = [set() for i in range(n)]
@@ -74,64 +76,4 @@ class Graph:
                         adjacences[i].add(j)
                         nb_aretes += 1
 
-        return Graph(n, sommets, nb_aretes, adjacences)
-
-
-    # =========================== #
-    # ====== APROXIMATIONS ====== #
-    # =========================== #
-
-    def couplage(self):
-        C = set()
-
-        for u in self.sommets:
-            for v in self.adjacences[u]:
-                if (v not in C) and (u not in C):
-                    C.add(v)
-                    C.add(u)
-
-        return C
-
-    def glouton(self):
-        C = set()
-        G = copy.deepcopy(self)
-        v_max = G.som_degmax()
-        
-        while G.nb_aretes > 0:
-            C.add(v_max)
-            G.suppr_aretes(v_max)
-            v_max = G.som_degmax()
-
-        return C
-
-
-    # =========================== #
-    # ===== BRANCH & REDUCE ===== #
-    # =========================== #
-         
-    def branch(self, pile=list()):
-        
-        if self.nb_aretes <= 0: return set()
-
-        C = set(self.sommets)
-
-        for u in self.sommets:
-            for v in self.adjacences[u]:
-                Cu = set()
-                Cv = set()
-
-                G_u = copy.deepcopy(self)   # G sans u
-                G_u.suppr_som(u)
-                # pile.append(G_u.sommets)
-                Cu.add(u)
-                Cu.update(G_u.branch())
-                
-                G_v = copy.deepcopy(self)   # G sans v
-                G_v.suppr_som(v)
-                # pile.append(G_v.sommets)
-                Cv.add(v)
-                Cv.update(G_v.branch())
-
-                if min(len(Cu),len(Cv)) < len(C):
-                    C = Cu if len(Cu) < len(Cv) else Cv
-        return C
+        return Graph(n, sommets, nb_aretes, adjacences, name)
