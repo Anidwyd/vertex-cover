@@ -3,8 +3,8 @@ from parser import parse
 
 class Graph:
 
-    def __init__(self, nb_som, sommets, nb_aretes, adjacences, name='G'):
-        self.nb_som = nb_som
+    def __init__(self, nb_sommets, sommets, nb_aretes, adjacences, name='G'):
+        self.nb_sommets = nb_sommets
         self.nb_aretes = nb_aretes
         self.sommets = sommets
         self.adjacences = adjacences
@@ -24,7 +24,7 @@ class Graph:
 
     def suppr_som(self, v):
         self.sommets.remove(v)
-        self.nb_som -= 1
+        self.nb_sommets -= 1
         self.suppr_aretes(v)
 
     def suppr_soms(self, ens):
@@ -32,11 +32,14 @@ class Graph:
             self.suppr_som(v)
 
     def arites(self):
-        res = [0] * self.nb_som
-        for i in range(self.nb_som):
+        res = [0] * self.nb_sommets
+        for i in range(self.nb_sommets):
             res[i] = len(self.adjacences[i])
 
         return res
+
+    def degmax(self):
+        return max(self.arites())
 
     def som_degmax(self):
         tab_arites = self.arites()
