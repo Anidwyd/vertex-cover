@@ -2,14 +2,20 @@
 # -------- TEST ALGOS -------- #
 # ============================ #
 
+import sys
 from graph import Graph
-from problems import *
+from algos import *
 
 def main():
-    # TODO: n et p en arguments
-    n = 4
-    p = .5
+    
+    if len(sys.argv) != 2:
+        print("Usage: python3 tests.py <n> <p>")
+        exit(1)
+
+    n = int(sys.argv[1])
+    p = float(sys.argv[2])
     G = Graph.random(n, p, 'G')
+
     G.show()
     print("* algo couplage    :", couplage(G))
     print("* algo glouton     :", glouton(G))
