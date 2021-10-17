@@ -17,11 +17,13 @@ def main():
     G = Graph.random(n, p, 'G')
 
     G.show()
-    print("* algo couplage  :", couplage(G))
-    print("* algo glouton   :", glouton(G))
-    print("* branch         :", branch(G))
-    print("* branch & bound :", branch_bound(G))
-    print("* branch & bound2:", branch_bound2(G))
+    # print("* algo couplage  :", couplage(G))
+    # print("* algo glouton   :", glouton(G))
+    print("* branch           :", branch(G))
+    print("* branch_it        :", branch_it(G))
+    # print("* branch & bound :", branch_bound(G))
+    print("* branch & bound2  :", branch_bound2(G))
+    print("* branch & bound it:", branch_bound_it(G))
 
 if __name__ == '__main__':
     main()
