@@ -38,16 +38,17 @@ def branch(G, C=set()):
     if G.nb_aretes > 0:
         # Choisir une arete {u,v} qui n'a pas encore été traitée
         for u in G.sommets:
-            u_checked = False
-            for v in G.adjacences[u]:
-                if not u_checked:
-                    # Générer le graphe formé à partir de G en supprimant u
-                    # et le vertex cover contenant u
-                    G_u = deepcopy(G)
-                    G_u.suppr_som(u)
-                    Cu = branch(G_u, C.union({u}))
-                    u_checked = True
+            
+            adj_u = G.adjacences[u]
+            if not adj_u: continue
 
+            # Générer le graphe formé à partir de G en supprimant u,
+            # et le vertex cover contenant u
+            G_u = deepcopy(G)
+            G_u.suppr_som(u)
+            Cu = branch(G_u, C.union({u}))
+            
+            for v in adj_u:
                 # Générer le graphe formé à partir de G en supprimant v,
                 # et le vertex cover contenant v 
                 G_v = deepcopy(G)
@@ -59,7 +60,7 @@ def branch(G, C=set()):
 
     return C
 
-def branch_bound(G, C=set()):
+def branch_bound(G, C=set(), verbose=False):
 
     delta = G.degmax()
 
@@ -72,20 +73,24 @@ def branch_bound(G, C=set()):
     b2 = len(couplage(G))/2   # M contient un ensemble de sommets et pas d'aretes
     b3 = (2*n-1 - sqrt((2*n -1)**2 - 8*m)) / 2.0
 
-    if len(C) < max(b1, max(b2, b3)):
+    binf = max(b1, max(b2, b3))
+
+    if len(C) < binf:
+
 
         # Choisir une arete {u,v} qui n'a pas encore été traitée
         for u in G.sommets:
-            u_checked = False
-            for v in G.adjacences[u]:
-                if not u_checked:
-                    # Générer le graphe formé à partir de G en supprimant u
-                    # et le vertex cover contenant u
-                    G_u = deepcopy(G)
-                    G_u.suppr_som(u)
-                    Cu = branch(G_u, C.union({u}))
-                    u_checked = True
+            
+            adj_u = G.adjacences[u]
+            if not adj_u: continue
 
+            # Générer le graphe formé à partir de G en supprimant u
+            # et le vertex cover contenant u
+            G_u = deepcopy(G)
+            G_u.suppr_som(u)
+            Cu = branch(G_u, C.union({u}))
+            
+            for v in adj_u:
                 # Générer le graphe formé à partir de G en supprimant v,
                 # et le vertex cover contenant v 
                 G_v = deepcopy(G)
@@ -97,7 +102,7 @@ def branch_bound(G, C=set()):
 
     return C
 
-def branch_bound2(G, C=set(), old_u=-1):
+def branch_bound2(G, C=set(), verbose=False):
 
     delta = G.degmax()
 
@@ -110,27 +115,26 @@ def branch_bound2(G, C=set(), old_u=-1):
     b2 = len(couplage(G))/2
     b3 = (2*n-1 - sqrt((2*n -1)**2 - 8*m)) / 2.0
 
-    if len(C) < max(b1, max(b2, b3)):
+    binf = max(b1, max(b2, b3))
 
+    if len(C) < binf:
         # Choisir une arete {u,v} qui n'a pas encore été traitée
         for u in G.sommets:
-            if u == old_u: continue
+            
+            adj_u = G.adjacences[u]
+            if not adj_u: continue
+
             # Générer le graphe formé à partir de G en supprimant u
             # et le vertex cover contenant u
             G_u = deepcopy(G)
             G_u.suppr_som(u)
             Cu = branch(G_u, C.union({u}))
 
-            # Générer le graphe formé à partir de G en supprimant v,
+            # Générer le graphe formé à partir de G en supprimant tous les voisins de u,
             # et le vertex cover contenant v 
             G_v = deepcopy(G)
-            Cv = set()
-
-            for v in G.adjacences[u]:
-                G_v.suppr_som(v)
-                Cv.add(v)
-
-            Cv = branch_bound2(G_v, C.union(Cv), u)
+            G_v.suppr_soms(adj_u)
+            Cv = branch_bound2(G_v, C.union(adj_u))
 
             # C prend la valeur du plus petit vertex cover trouvé
             C = Cu if len(Cu) < len(Cv) else Cv
