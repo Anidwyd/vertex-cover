@@ -24,8 +24,8 @@ def parse(filename):
             if cond == 2:
                 nb_aretes = int(line)
             if cond == 3:
-                (u,v) = line.split()
-                # aretes.append((u,v))
+                u,v = line.split()
+                aretes.append((int(u),int(v)))
                 adjacences[int(u)].add(int(v))
     
-    return nb_som, sommets, nb_aretes, adjacences
+    return nb_som, sommets, nb_aretes, aretes
