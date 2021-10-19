@@ -165,17 +165,11 @@ def branch_it(G):
         if curr.G.nb_aretes == 0:
             if len(curr.C) < len(Cbest):
                 Cbest = curr.C
-                continue
+            continue
 
         for u in curr.G.sommets:
             adj_u = curr.G.adjacences[u]
             if not adj_u: continue
-
-            # Générer le graphe formé à partir de G en supprimant u,
-            # et le vertex cover contenant u
-            G_u = deepcopy(curr.G)
-            G_u.suppr_som(u)
-            pile.append(Node(G_u, curr.C.union({u})))
 
             for v in adj_u:
                 # Générer le graphe formé à partir de G en supprimant v,
@@ -184,49 +178,101 @@ def branch_it(G):
                 G_v.suppr_som(v)
                 pile.append(Node(G_v, curr.C.union({v})))
 
+            # Générer le graphe formé à partir de G en supprimant u,
+            # et le vertex cover contenant u
+            G_u = deepcopy(curr.G)
+            G_u.suppr_som(u)
+            pile.append(Node(G_u, curr.C.union({u})))
+
     return Cbest
 
+def get_binf(G):
+    delta = G.degmax()
+
+    if delta == 0:
+        return delta
+
+    n = G.nb_sommets
+    m = G.nb_aretes
+
+    b1 = ceil(m*1.0 / delta)
+    b2 = len(couplage(G))/2
+    b3 = (2*n-1 - sqrt((2*n -1)**2 - 8*m)) / 2.0
+
+    return max(b1, max(b2, b3))
+    
+ 
 def branch_bound_it(G):
     root = Node(G,set())
     pile = []
     pile.append(root)
-    Cbest = set(G.sommets)
+    Cbest = set()
+    bsup = -1
 
     while pile != []:
-
         curr = pile.pop()
-        delta = curr.G.degmax()
+        binf = get_binf(curr.G)
 
-        if delta == 0:
-            if len(curr.C) < len(Cbest):
+        if binf == 0:
+            if not Cbest or len(curr.C) < bsup:
                 Cbest = curr.C
+                bsup = len(Cbest)
             continue
 
-        n = G.nb_sommets
-        m = G.nb_aretes
+        if Cbest and (len(curr.C) >= bsup or binf >= bsup):
+            continue
 
-        b1 = ceil(m*1.0 / delta)
-        b2 = len(couplage(G))/2
-        b3 = (2*n-1 - sqrt((2*n -1)**2 - 8*m)) / 2.0
+        for u in curr.G.sommets:
+            adj_u = curr.G.adjacences[u]
+            if not adj_u: continue
 
-        binf = max(b1, max(b2, b3))
+            for v in adj_u:
+                # Générer le graphe formé à partir de G en supprimant v,
+                # et le vertex cover contenant v 
+                G_v = deepcopy(curr.G)
+                G_v.suppr_som(v)
+                pile.append(Node(G_v, curr.C.union({v})))
 
-        if len(Cbest) >= binf:
-            for u in curr.G.sommets:
-                adj_u = curr.G.adjacences[u]
-                if not adj_u: continue
-
-                # Générer le graphe formé à partir de G en supprimant u
-                G_u = deepcopy(curr.G)
-                G_u.suppr_som(u)
-                pile.append(Node(G_u, curr.C.union({u})))
-
-                # Générer le graphe formé à partir de G en supprimant tous
-                # les voisins de u.
-                G_v = deepcopy(G)
-                G_v.suppr_soms(adj_u)
-                pile.append(Node(G_v, curr.C.union(adj_u)))
+            # Générer le graphe formé à partir de G en supprimant u
+            G_u = deepcopy(curr.G)
+            G_u.suppr_som(u)
+            pile.append(Node(G_u, curr.C.union({u})))
 
     return Cbest
 
-        
+def branch_bound_it2(G):
+    root = Node(G,set())
+    pile = []
+    pile.append(root)
+    Cbest = set()
+    bsup = -1
+
+    while pile != []:
+        curr = pile.pop()
+        binf = get_binf(curr.G)
+
+        if binf == 0:
+            if not Cbest or len(curr.C) < bsup:
+                Cbest = curr.C
+                bsup = len(Cbest)
+            continue
+
+        if Cbest and (len(curr.C) >= bsup or binf >= bsup):
+            continue
+
+        for u in curr.G.sommets:
+            adj_u = curr.G.adjacences[u]
+            if not adj_u: continue
+
+            # Générer le graphe formé à partir de G en supprimant tous
+            # les voisins de u.
+            G_v = deepcopy(curr.G)
+            G_v.suppr_soms(adj_u)
+            pile.append(Node(G_v, curr.C.union(adj_u)))
+
+            # Générer le graphe formé à partir de G en supprimant u
+            G_u = deepcopy(curr.G)
+            G_u.suppr_som(u)
+            pile.append(Node(G_u, curr.C.union({u})))
+
+    return Cbest

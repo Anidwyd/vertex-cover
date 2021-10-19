@@ -32,11 +32,7 @@ class Graph:
             self.suppr_som(v)
 
     def arites(self):
-        res = [0] * self.nb_sommets
-        for i in range(self.nb_sommets):
-            res[i] = len(self.adjacences[i])
-
-        return res
+        return [len(self.adjacences[i]) for i in range(max(self.sommets)+1)]
 
     def degmax(self):
         return max(self.arites())
