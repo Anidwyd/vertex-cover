@@ -38,6 +38,9 @@ class Graph:
 
         return arites
 
+    def deg(self, u):
+        return self.arites()[u]
+
     def degmax(self):
         return max(self.arites())
 
@@ -56,15 +59,13 @@ class Graph:
                 adj.append(v)
 
         return adj
-    
-    def is_empty(self):
-        return not self.sommets
 
-    def show(self):
-        print("----------------------------",
-            "\nsommets   :", self.sommets,
+    def show(self, name=None):
+        print("--------------------------------")
+        if name : print(('[' + name + ']').center(32))
+        print("sommets   :", self.sommets,
             "\naretes    :", self.aretes,
-            "\n----------------------------\n")
+            "\n--------------------------------\n")
 
     # =========================== #
     # -------- BUILDERS --------- #

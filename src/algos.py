@@ -161,7 +161,53 @@ def bb_improved(G, approx=couplage):
             bsup = len(C)
 
         else:
-            u = newG.aretes[0][0]
+            u = newG.som_degmax()
+            adj_u = newG.som_adjacents(u)
+            pile += [ Node(newG, newC, u), Node(newG, newC, adj_u) ]
+
+    return C, cpt
+
+def bb_improved2(G, approx=couplage):
+    C = set()
+
+    u,v = G.aretes[0]
+    pile = [ Node(G, {u}, u), Node(G, {v}, v) ]
+    
+    bsup = -1
+    cpt = 0
+
+    while pile != []:
+        curr = pile.pop()
+        cpt += 1
+
+        if curr.G.nb_aretes == 0: continue
+
+        if type(curr.s) is list:
+            # sup1 = [w for w in curr.s if curr.G.deg(w) > 1]
+            newG = Graph.suppr_soms(curr.G, curr.s)
+            newC = curr.C.union(curr.s)
+        else:
+            newG = Graph.suppr_som(curr.G, curr.s)
+            newC = curr.C.union({curr.s})
+
+        binf = get_binf(newG)
+        
+        if binf == 0:
+            if bsup < 0 or len(newC) < bsup:
+                C = newC
+                bsup = len(C)
+            continue
+
+        if bsup > 0 and (len(newC) + binf >= bsup): continue
+
+        Creal = approx(newG)
+
+        if len(Creal) + len(newC) < bsup:
+            C = newC.union(Creal)
+            bsup = len(C)
+
+        else:
+            u = newG.som_degmax()
             adj_u = newG.som_adjacents(u)
             pile += [ Node(newG, newC, u), Node(newG, newC, adj_u) ]
 

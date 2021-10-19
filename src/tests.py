@@ -17,6 +17,19 @@ def main():
     p = float(sys.argv[2])
     G = Graph.random(n, p)
 
+    # COMPARAISON COUPLAGE / GLOUTON
+    # f(n) et f(p) + rapport approx
+
+    # ...
+
+
+
+    # EVALUATION TEMPS CALCUL B & B
+    # f(n) et f(p) 
+
+    # ...
+
+
     G.show()
     print("* algo couplage  :", couplage(G))
     print("* algo glouton   :", glouton(G))
