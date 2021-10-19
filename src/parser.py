@@ -3,6 +3,7 @@ def parse(filename):
     nb_som = 0
     sommets = []
     nb_aretes = 0
+    aretes = []
     adjacences = []
 
     parse_list = ["Nombre de sommets\n","Sommets\n","Nombre d aretes\n","Aretes\n"]
@@ -23,7 +24,8 @@ def parse(filename):
             if cond == 2:
                 nb_aretes = int(line)
             if cond == 3:
-                couple = line.split()
-                (adjacences[int(couple[0])]).add(int(couple[1]))
+                (u,v) = line.split()
+                # aretes.append((u,v))
+                adjacences[int(u)].add(int(v))
     
     return nb_som, sommets, nb_aretes, adjacences

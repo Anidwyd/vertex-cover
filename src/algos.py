@@ -30,121 +30,8 @@ def glouton(G):
 
     return C
 
-
 # ============================ #
 # ----- BRANCH & REDUCE ------ #
-# ============================ #
-
-def branch(G, C=set()):
-
-    if G.nb_aretes > 0:
-        # Choisir une arete {u,v} qui n'a pas encore été traitée
-        for u in G.sommets:
-            
-            adj_u = G.adjacences[u]
-            if not adj_u: continue
-
-            # Générer le graphe formé à partir de G en supprimant u,
-            # et le vertex cover contenant u
-            G_u = deepcopy(G)
-            G_u.suppr_som(u)
-            Cu = branch(G_u, C.union({u}))
-            
-            for v in adj_u:
-                # Générer le graphe formé à partir de G en supprimant v,
-                # et le vertex cover contenant v 
-                G_v = deepcopy(G)
-                G_v.suppr_som(v)
-                Cv = branch(G_v, C.union({v}))
-
-                # C prend la valeur du plus petit vertex cover trouvé
-                C = Cu if len(Cu) < len(Cv) else Cv
-
-    return C
-
-def branch_bound(G, C=set(), verbose=False):
-
-    delta = G.degmax()
-
-    if delta == 0: return C
-
-    n = G.nb_sommets
-    m = G.nb_aretes
-
-    b1 = ceil(m*1.0 / delta)
-    b2 = len(couplage(G))/2   # M contient un ensemble de sommets et pas d'aretes
-    b3 = (2*n-1 - sqrt((2*n -1)**2 - 8*m)) / 2.0
-
-    binf = max(b1, max(b2, b3))
-
-    if len(C) < binf:
-
-        # Choisir une arete {u,v} qui n'a pas encore été traitée
-        for u in G.sommets:
-            
-            adj_u = G.adjacences[u]
-            if not adj_u: continue
-
-            # Générer le graphe formé à partir de G en supprimant u
-            # et le vertex cover contenant u
-            G_u = deepcopy(G)
-            G_u.suppr_som(u)
-            Cu = branch(G_u, C.union({u}))
-            
-            for v in adj_u:
-                # Générer le graphe formé à partir de G en supprimant v,
-                # et le vertex cover contenant v 
-                G_v = deepcopy(G)
-                G_v.suppr_som(v)
-                Cv = branch_bound(G_v, C.union({v}))
-
-                # C prend la valeur du plus petit vertex cover trouvé
-                C = Cu if len(Cu) < len(Cv) else Cv
-
-    return C
-
-def branch_bound2(G, C=set(), verbose=False):
-
-    delta = G.degmax()
-
-    if delta == 0: return C
-
-    n = G.nb_sommets
-    m = G.nb_aretes
-
-    b1 = ceil(m*1.0 / delta)
-    b2 = len(couplage(G))/2
-    b3 = (2*n-1 - sqrt((2*n -1)**2 - 8*m)) / 2.0
-
-    binf = max(b1, max(b2, b3))
-
-    if len(C) < binf:
-        # Choisir une arete {u,v} qui n'a pas encore été traitée
-        for u in G.sommets:
-            
-            adj_u = G.adjacences[u]
-            if not adj_u: continue
-
-            # Générer le graphe formé à partir de G en supprimant u
-            # et le vertex cover contenant u
-            G_u = deepcopy(G)
-            G_u.suppr_som(u)
-            Cu = branch(G_u, C.union({u}))
-
-            # Générer le graphe formé à partir de G en supprimant tous les voisins de u,
-            # et le vertex cover contenant v 
-            G_v = deepcopy(G)
-            G_v.suppr_soms(adj_u)
-            Cv = branch_bound2(G_v, C.union(adj_u))
-
-            # C prend la valeur du plus petit vertex cover trouvé
-            C = Cu if len(Cu) < len(Cv) else Cv
-
-    return C
-
-
-# ============================ #
-# ---- ITERATIVE VERSION ----- #
 # ============================ #
 
 class Node:
@@ -152,10 +39,15 @@ class Node:
         self.G = G
         self.C = C
 
-def branch_it(G):
-    root = Node(G,set())
+def branch_naive(G):
+    C = set()
     pile = []
-    pile.append(root)
+    pile.append(Node())
+
+
+def branch_it(G):
+    nb_node = 0
+    pile = [Node(G,set())]
     Cbest = set(G.sommets)
 
     while pile != []:
@@ -167,24 +59,33 @@ def branch_it(G):
                 Cbest = curr.C
             continue
 
+        checked = []
+
         for u in curr.G.sommets:
+            if u in checked: continue
+            checked.append(u)
+
             adj_u = curr.G.adjacences[u]
             if not adj_u: continue
+            checked += adj_u
 
             for v in adj_u:
+                if v in checked: continue
                 # Générer le graphe formé à partir de G en supprimant v,
                 # et le vertex cover contenant v 
                 G_v = deepcopy(curr.G)
                 G_v.suppr_som(v)
                 pile.append(Node(G_v, curr.C.union({v})))
+                nb_node += 1
 
             # Générer le graphe formé à partir de G en supprimant u,
             # et le vertex cover contenant u
             G_u = deepcopy(curr.G)
             G_u.suppr_som(u)
             pile.append(Node(G_u, curr.C.union({u})))
+            nb_node += 1
 
-    return Cbest
+    return Cbest, nb_node
 
 def get_binf(G):
     delta = G.degmax()
@@ -201,11 +102,9 @@ def get_binf(G):
 
     return max(b1, max(b2, b3))
     
- 
 def branch_bound_it(G):
-    root = Node(G,set())
-    pile = []
-    pile.append(root)
+    nb_node = 0
+    pile = [Node(G,set())]
     Cbest = set()
     bsup = -1
 
@@ -219,7 +118,14 @@ def branch_bound_it(G):
                 bsup = len(Cbest)
             continue
 
-        if Cbest and (len(curr.C) >= bsup or binf >= bsup):
+        if bsup > 0 and (len(curr.C) + binf >= bsup):
+            continue
+
+        Creal = couplage(curr.G)
+
+        if len(Creal) + len(curr.C) < bsup:
+            Cbest = curr.C.union(Creal)
+            bsup = len(Cbest)
             continue
 
         for u in curr.G.sommets:
@@ -232,15 +138,18 @@ def branch_bound_it(G):
                 G_v = deepcopy(curr.G)
                 G_v.suppr_som(v)
                 pile.append(Node(G_v, curr.C.union({v})))
+                nb_node += len(adj_u)
 
             # Générer le graphe formé à partir de G en supprimant u
             G_u = deepcopy(curr.G)
             G_u.suppr_som(u)
             pile.append(Node(G_u, curr.C.union({u})))
+            nb_node += 1
 
-    return Cbest
+    return Cbest, nb_node
 
 def branch_bound_it2(G):
+    nb_node = 0
     root = Node(G,set())
     pile = []
     pile.append(root)
@@ -257,22 +166,36 @@ def branch_bound_it2(G):
                 bsup = len(Cbest)
             continue
 
-        if Cbest and (len(curr.C) >= bsup or binf >= bsup):
+        if bsup > 0 and (len(curr.C) + binf >= bsup):
             continue
 
+        Creal = couplage(curr.G)
+
+        if len(Creal) + len(curr.C) < bsup:
+            Cbest = curr.C.union(Creal)
+            bsup = len(Cbest)
+            continue
+
+        checked = []
         for u in curr.G.sommets:
-            adj_u = curr.G.adjacences[u]
+            if u in checked: continue
+            checked.append(u)
+
+            adj_u = [v for v in curr.G.adjacences[u] if v not in checked]
             if not adj_u: continue
+            checked += adj_u
 
             # Générer le graphe formé à partir de G en supprimant tous
             # les voisins de u.
             G_v = deepcopy(curr.G)
             G_v.suppr_soms(adj_u)
             pile.append(Node(G_v, curr.C.union(adj_u)))
+            nb_node += len(adj_u)
 
             # Générer le graphe formé à partir de G en supprimant u
             G_u = deepcopy(curr.G)
             G_u.suppr_som(u)
             pile.append(Node(G_u, curr.C.union({u})))
+            nb_node += 1
 
-    return Cbest
+    return Cbest, nb_node

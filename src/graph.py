@@ -3,12 +3,11 @@ from parser import parse
 
 class Graph:
 
-    def __init__(self, nb_sommets, sommets, nb_aretes, adjacences, name='G'):
+    def __init__(self, nb_sommets, sommets, nb_aretes, adjacences):
         self.nb_sommets = nb_sommets
-        self.nb_aretes = nb_aretes
         self.sommets = sommets
+        self.nb_aretes = nb_aretes
         self.adjacences = adjacences
-        self.name = name if name else 'G'
 
     # =========================== #
     # --------- OP BASE --------- #
@@ -47,22 +46,24 @@ class Graph:
         return not self.sommets
 
     def show(self):
-        print("----------- ", self.name, " -----------",
+        print("----------------------------",
             "\nsommets  :", self.sommets,
             "\naretes   :", self.adjacences,
             "\n----------------------------\n")
 
+    def clone(self):
+        return Graph(self.nb_sommets, self.sommets, self.nb_aretes, self.adjacences)
 
     # =========================== #
     # -------- BUILDERS --------- #
     # =========================== #
 
     @staticmethod
-    def from_text(filename, name=None):
-        return Graph(*parse(filename), name)
+    def from_text(filename):
+        return Graph(*parse(filename))
 
     @staticmethod
-    def random(n, p, name=None):
+    def random(n, p):
         sommets = [i for i in range(n)]
         nb_aretes = 0
         adjacences = [set() for i in range(n)]
@@ -75,4 +76,4 @@ class Graph:
                         adjacences[i].add(j)
                         nb_aretes += 1
 
-        return Graph(n, sommets, nb_aretes, adjacences, name)
+        return Graph(n, sommets, nb_aretes, adjacences)
