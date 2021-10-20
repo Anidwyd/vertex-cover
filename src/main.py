@@ -17,7 +17,6 @@ def main():
     print("* branch         :", branch(G))
     print("* branch & bound :", branch_bound(G))
     print("* B & B improved :", bb_improved(G))
-    print("* B & B improved2:", bb_improved2(G))
 
 
 if __name__ == '__main__':

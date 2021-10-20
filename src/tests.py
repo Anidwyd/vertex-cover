@@ -17,15 +17,10 @@ def main():
     p = float(sys.argv[2])
     G = Graph.random(n, p)
 
-    # COMPARAISON COUPLAGE / GLOUTON
-    # f(n) et f(p) + rapport approx
-
-    # ...
+    # =========== COMPARAISON COUPLAGE / GLOUTON =========== #
 
 
-
-    # EVALUATION TEMPS CALCUL B & B
-    # f(n) et f(p) 
+    # =========== EVALUATION TEMPS CALCUL B & B ============ #
 
     # ...
 
@@ -38,9 +33,9 @@ def main():
     print("* B & B improved :", bb_improved(G))
 
 if __name__ == '__main__':
-    profiler = cProfile.Profile()
-    profiler.enable()
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     main()
-    profiler.disable()
-    stats = pstats.Stats(profiler).sort_stats('tottime')
-    stats.print_stats()
+    # profiler.disable()
+    # stats = pstats.Stats(profiler).sort_stats('tottime')
+    # stats.print_stats()
