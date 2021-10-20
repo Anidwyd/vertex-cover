@@ -1,5 +1,5 @@
 from random import uniform
-from parser import parse
+from parser import parseFromFile
 
 class Graph:
     """
@@ -7,36 +7,66 @@ class Graph:
     une liste d'arêtes. 
     """
 
-    def __init__(self, nb_sommets, sommets, nb_aretes, aretes):
+    def __init__(self, nb_sommets, sommets, nb_aretes, aretes, arites=None):
         self.nb_sommets = nb_sommets
         self.sommets = sommets
         self.nb_aretes = nb_aretes
         self.aretes = aretes
 
+        if arites != None:
+            self.arites = arites
+        else:
+            self.arites = [0] * (max(self.sommets)+1)
+
+            # Pour chaque sommet, on compte le nombre d'aretes dans lequel
+            # il est impliqué.
+            for u in self.sommets:
+                for e in self.aretes:
+                    if u in e: self.arites[u] += 1
+
     # =========================== #
     # --------- OP BASE --------- #
     # =========================== #
 
-    def suppr_aretes(self, v):
+    def suppr_aretes(self, s):
         """
-        Supprime les arêtes incidentes au sommet v.
-        :param v: le sommet
+        Supprime les arêtes incidentes au sommet s.
+        :param s: le sommet
         """
-        self.aretes = [e for e in self.aretes if v not in e]
+        aretes = []
+
+        for (u,v) in self.aretes:
+            if s not in (u,v):
+                aretes.append((u,v))
+            else:
+                self.arites[u] -= 1
+                self.arites[v] -= 1
+
+        self.aretes = aretes
         self.nb_aretes = len(self.aretes)
 
-    def suppr_som(G, v):
+    def suppr_som(G, s):
         """
-        Retourne un nouveau graphe obtenu à partir de G en supprimant le sommet v
+        Retourne un nouveau graphe obtenu à partir de G en supprimant le sommet s
         et les arêtes incidentes.
         :param G: le graphe
-        :param v: le sommet
+        :param s: le sommet
         :return: une copie de G sans le sommet v et ses arêtes incidentes
         """
-        sommets = [u for u in G.sommets if u != v]
-        aretes = [e for e in G.aretes if v not in e]
+        sommets = list(G.sommets)
+        sommets.remove(s)
 
-        return Graph(G.nb_sommets-1, sommets, len(aretes), aretes)
+        arites = G.arites[:]
+        aretes = []
+
+        for (u,v) in G.aretes:
+            if s not in (u,v):
+                aretes.append((u,v))
+            else:
+                arites[u] -= 1
+                arites[v] -= 1
+
+        return Graph(G.nb_sommets-1, sommets, len(aretes), aretes, arites)
 
     def suppr_soms(G, S):
         """
@@ -46,10 +76,20 @@ class Graph:
         :param S: l'ensemble de sommets
         :return: une copie de G sans les sommets de S et leurs arêtes incidentes
         """
-        sommets = [u for u in G.sommets if u not in S]
-        aretes = [(u,v) for (u,v) in G.aretes if u not in S and v not in S]
+        # sommets = [u for u in G.sommets if u not in S]
+        sommets = list(set(G.sommets) - set(S))
 
-        return Graph(len(sommets), sommets, len(aretes), aretes)
+        arites = G.arites[:]
+        aretes = []
+
+        for (u,v) in G.aretes:
+            if u not in S and v not in S:
+                aretes.append((u,v))
+            else:
+                arites[u] -= 1
+                arites[v] -= 1
+
+        return Graph(len(sommets), sommets, len(aretes), aretes, arites)
 
     def arites(self):
         """
@@ -73,14 +113,22 @@ class Graph:
         :param u: le sommet
         :return: le degré de u
         """
-        return self.arites()[u]
+        return self.arites[u]
+
+    def som_deg(self, deg):
+        """
+        Retourne le degré du sommet u du graphe.
+        :param u: le sommet
+        :return: le degré de u
+        """
+        return -1 if deg not in self.arites else self.arites.index(deg)
 
     def degmax(self):
         """
         Détermine le degré maximum du graphe.
         :return: le degré maximum du graphe.
         """
-        return max(self.arites())
+        return max(self.arites)
 
     def som_degmax(self):
         """
@@ -88,10 +136,8 @@ class Graph:
         :return: - le sommet de degré maximum dans le graphe ou
                  - -1 si le graphe n'est pas connecté
         """
-        tab_arites = self.arites()
-        degmax = max(tab_arites)
-
-        return -1 if degmax == 0 else tab_arites.index(degmax) 
+        degmax = max(self.arites)
+        return -1 if degmax == 0 else self.arites.index(degmax) 
 
     def som_adjacents(self, u):
         """
@@ -107,6 +153,9 @@ class Graph:
                 adj.append(v)
 
         return adj
+
+    def clone(self):
+        return Graph(self.nb_sommets, self.sommets[:], self.nb_aretes, self.aretes[:], self.arites[:])
 
     def show(self, name=None):
         print("--------------------------------")
@@ -126,7 +175,7 @@ class Graph:
         :param filename: le nom du fichier
         :return: le graphe généré
         """
-        return Graph(*parse(filename))
+        return Graph(*parseFromFile(filename))
 
     @staticmethod
     def random(n, p):
@@ -146,7 +195,7 @@ class Graph:
                 if i == j or i in adjacences[j]:
                     continue
                 
-                if uniform(.1, .9) <= p:
+                if uniform(0, 1) <= p:
                     aretes.append((i,j))
                     adjacences[i].add(j)
                     nb_aretes += 1

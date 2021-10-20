@@ -1,4 +1,4 @@
-def parse(filename):
+def parseFromFile(filename):
     cond = -1
     nb_som = 0
     sommets = []
@@ -17,7 +17,6 @@ def parse(filename):
 
             if cond == 0:
                 nb_som = int(line)
-                adjacences = [set() for _ in range(nb_som)]
             if cond == 1:
                 sommets.append(int(line.rstrip()))
             if cond == 2:
