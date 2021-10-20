@@ -91,7 +91,7 @@ def branch(G):
     """
 
     # Si le graphe n'est pas connecté, renvoyer l'ensemble vide
-    if G.nb_aretes == 0: return set()
+    if G.nb_aretes == 0: return set(), 0
 
     C = set()   # Ensemble de sommets vide
 
@@ -137,7 +137,7 @@ def branch_bound(G, approx=couplage):
     :param approx: algorithme de calcul d'une solution réalisable
     :return: C une couverture de G
     """
-    if G.nb_aretes == 0: return set()
+    if G.nb_aretes == 0: return set(), 0
 
     C = set()
     u,v = G.aretes[0]
@@ -192,7 +192,7 @@ def bb_improved(G, approx=couplage):
     :param G: le graphe
     :return: C une couverture de G
     """
-    if G.nb_aretes == 0: return set()
+    if G.nb_aretes == 0: return set(), 0
 
     C = set()
     u,v = G.aretes[0]
@@ -243,7 +243,7 @@ def bb_improved2(G, approx=couplage):
     :param G: le graphe
     :return: C une couverture de G
     """
-    if G.nb_aretes == 0: return set()
+    if G.nb_aretes == 0: return set(), 0
 
     C = set()
     u,v = G.aretes[0]

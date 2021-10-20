@@ -15,34 +15,8 @@ import numpy as np
 import time
 import csv
 
-
-# def get_plot_done(filename):
-#     location = '../test/'
-#     filename = location + filename
-
-#     n = []
-#     tc = []
-#     tg = []
-
-#     with open (filename, 'r') as csvfile:
-#         plots = csv.reader(csvfile)
-        
-#         for row in plots:
-#             n.append(row[0])
-#             tc.append(row[1])
-#             tg.append(row[2])
-
-#     plt.title('TEST')
-#     plt.axis('scaled')
-#     plt.xlabel(n[0])
-#     plt.ylabel('temps(s)')
-    
-#     plt.plot(n[1:], tc[1:], 'r--', n[1:], tg[1:], 'r--')
-    
-#     plt.legend([tc[0], tg[0]])
-#     plt.show()
-
-Nrep = 10
+Nrep = 20
+location = '../test/'
 
 def compare_time_fp(filename, Nmax, algos):
     with open(filename+'_tp.csv', 'w', newline='') as fp:
@@ -66,7 +40,6 @@ def compare_time_fp(filename, Nmax, algos):
 
 
 def compare_branch(filename, Nmax, algos):
-    location = '../test/'
     filename = location + filename
 
     step = Nmax//10
@@ -103,7 +76,6 @@ def compare_branch(filename, Nmax, algos):
 
 
 def compare_approx(filename, Nmax, algos, algo_opt):
-    location = '../test/'
     filename = location + filename
     nb_algos = len(algos)
 
@@ -148,7 +120,7 @@ def main():
     # =========== COMPARAISON B & B ============ #
     compare_branch('branch', 25, [branch, branch_bound, bb_improved, bb_improved2])
     compare_branch('branch_bound', 35, [branch_bound, bb_improved, bb_improved2])
-    compare_branch('branch_improved', 150, [bb_improved, bb_improved2])
+    compare_branch('branch_improved', 100, [bb_improved, bb_improved2])
 
 
 if __name__ == '__main__':
