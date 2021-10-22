@@ -1,5 +1,5 @@
 from random import uniform
-from parser import parseFromFile
+from parseur import parseFromFile
 
 class Graph:
     """
